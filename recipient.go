@@ -28,7 +28,7 @@ func (r *recipient) generateTagsMap() {
 }
 
 // Compare if the recipient has at least 2 similar tags with the recipient from the argument input and returns a boolean value
-func (r *recipient) hasTwoOrMoreSimilarTags(compareRecipient recipient) bool {
+func (r *recipient) hasTwoOrMoreOverlappingTags(compareRecipient recipient) bool {
 	count := 0
 
 	for _, t := range r.Tags {

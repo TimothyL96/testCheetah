@@ -23,14 +23,14 @@ func processData() {
 	// 1. Read data from file
 	recipients := readJSON(fileName)
 
-	// 2. Populate map for recipients (Dictionary in C#)
+	// 2. Populate map for recipients (Dictionary/HashSet in C#)
 	generateAllRecipientsTagsMap(&recipients)
 
 	// 3. Get the recipients pair with at least 2 overlapping tags
-	similarRecipients := getTwoOrMoreOverlappingTagsRecipients(recipients)
+	overlappingRecipients := getTwoOrMoreOverlappingTagsRecipients(recipients)
 
 	// 4. Get the intended output string
-	formattedNames := getFormattedNameOfSimilarRecipients(similarRecipients)
+	formattedNames := getFormattedNameOfSimilarRecipients(overlappingRecipients)
 
 	// 5. Print the result out
 	fmt.Println(formattedNames)
@@ -44,15 +44,15 @@ func generateAllRecipientsTagsMap(recipients *[]recipient) {
 }
 
 // Input a list of recipients and returns a list of recipients pairs with at least 2 overlapping tags
-func getTwoOrMoreOverlappingTagsRecipients(recipients []recipient) (similarRecipients [][]recipient) {
+func getTwoOrMoreOverlappingTagsRecipients(recipients []recipient) (overlappingRecipients [][]recipient) {
 	// Traverse through each recipient
 	for k := range recipients {
 		// Traverse through each recipient + 1
 		for j := range recipients[k+1:] {
 			// Find similar tag
-			if recipients[k].hasTwoOrMoreSimilarTags(recipients[j+k+1]) {
+			if recipients[k].hasTwoOrMoreOverlappingTags(recipients[j+k+1]) {
 				// Append to the pair if they have at least 2 overlapping tags
-				similarRecipients = append(similarRecipients, []recipient{recipients[k], recipients[j+k+1]})
+				overlappingRecipients = append(overlappingRecipients, []recipient{recipients[k], recipients[j+k+1]})
 			}
 		}
 	}
@@ -62,12 +62,12 @@ func getTwoOrMoreOverlappingTagsRecipients(recipients []recipient) (similarRecip
 
 // From the argument input of array, generate the intended name.
 // Ex: "Name2, Name1|Name1, Name3"
-func getFormattedNameOfSimilarRecipients(similarRecipients [][]recipient) string {
+func getFormattedNameOfSimilarRecipients(overlappingRecipients [][]recipient) string {
 	// Use a string builder
 	var sb strings.Builder
 
 	// Iterate through all the pairs of names
-	for k, v := range similarRecipients {
+	for k, v := range overlappingRecipients {
 		// Separate pairs with '|'
 		if k != 0 {
 			sb.WriteByte('|')
@@ -105,14 +105,14 @@ func readJSON(fileName string) []recipient {
 
 	// Create rw Reader and read all from the file
 	reader := bufio.NewReader(file)
-	jsonStr, err := ioutil.ReadAll(reader)
+	jsonData, err := ioutil.ReadAll(reader)
 	if err != nil {
 		panic(err)
 	}
 
 	// Unmarshal the data to rw Recipient wrapper
 	var rw recipientWrapper
-	err = json.Unmarshal(jsonStr, &rw)
+	err = json.Unmarshal(jsonData, &rw)
 	if err != nil {
 		panic(err)
 	}
